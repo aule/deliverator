@@ -1,0 +1,21 @@
+{
+  "name": "notify",
+  "description": "Simple push based notification server",
+  "version": "0.0.1",
+  "author": "Joe Taylor",
+  "contributors": [
+    "Joe Taylor"
+  ],
+  "license": "Public Domain",
+  "dependencies": {
+    "socket.io": "~1.0.0",
+    "socket.io-client": "~1.0.0"
+  },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "files": [
+    "server.js",
+    "client.js"
+  ]
+}
