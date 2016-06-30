@@ -8,13 +8,17 @@ function trigger(){
     var buffer_off = new Buffer([ 255, 1, 0]);
     try {
         var wstream = fs.createWriteStream('/dev/ttyUSB0');
+        wstream.on('error', function(error){
+            console.log("Error with trigger stream.");
+            console.log(error);
+        })
         wstream.write(buffer_on);
         setTimeout(function() {
             wstream.write(buffer_off);
             wstream.end();
         }, 200);
-    }
-    catch (e) {
+        console.log("lsdfol");
+    } catch (e) {
         console.log("Error with trigger.");
         console.log(e);
     }
