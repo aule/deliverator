@@ -1,0 +1,35 @@
+* {}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-image: url('skulls.png');
+  background-repeat: repeat;
+}
+
+.container {
+  height: 70%;
+}
+
+#head_banner {
+  width: 100%;
+  height: 15%;
+  text-align: center;
+  font-size: 40px;
+  font-family: 'Love Ya Like A Sister', cursive;
+  padding: 0px;
+  margin: 0px;
+}
+
+#footer_banner {
+  width: 100%;
+  height: 15%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 25px;
+  font-family: 'Love Ya Like A Sister', cursive;
+  padding: 0px;
+  margin: 0px;
+}

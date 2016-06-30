@@ -28,8 +28,15 @@ io_server.use(function (socket, next){
     next();
 });
 
+app.set('view engine', 'ejs');
+
+app.use(express.static(__dirname + '/public'));
 app.use(body_parser.urlencoded({ extended: false }))
 app.use(body_parser.json())
+
+app.get('/', function(req, res) {
+    res.render('pages/index')
+});
 
 app.get('/send/:topic', function (request, response){
     response.setHeader("content-type", "text/html");
