@@ -1,30 +1,8 @@
 var IOClient = require('socket.io-client');
-var exec = require('child_process').exec;
-var fs = require('fs');
-var connection = IOClient("ws://jessies.personal.jcarter.uk0.bigv.io:4567", {'transports': ['websocket']});
+var Hammer = require('./lib/hammer');
+var Trigger = require('./lib/trigger');
 
-function trigger(){
-    var buffer_on = new Buffer([ 255, 1, 1]);
-    var buffer_off = new Buffer([ 255, 1, 0]);
-    try {
-        var wstream = fs.createWriteStream('/dev/ttyUSB0');
-        wstream.on('error', function(error){
-            console.log("Error with trigger stream.");
-            console.log(error);
-        })
-        wstream.write(buffer_on);
-        setTimeout(function() {
-            wstream.write(buffer_off);
-            wstream.end();
-        }, 200);
-        console.log("lsdfol");
-    } catch (e) {
-        console.log("Error with trigger.");
-        console.log(e);
-    }
-}
-
-function connect(url, topics){
+function connect(url, topics, trigger){
     var opts = {
         'transports': ['websocket'],
         'query': {'topics': topics}
@@ -58,16 +36,19 @@ function connect(url, topics){
 }
 
 function start(){
-    var args = process.argv.slice();
-    var node = args.shift();
-    var script = args.shift();
-    var url = args.shift();
-    var topics = args;
+    var args = process.argv.slice(),
+        node = args.shift(),
+        script = args.shift(),
+        url = args.shift(),
+        topics = args,
+        hammer = new Hammer("/dev/ttyUSB0"),
+        trigger = new Trigger(hammer);
+
     if(!url){
         console.log("Usage: " + node + " " + script + " <url> <topic> [... <topic>]");
         process.exit(1);
     }
-    connect(url, topics);
+    connect(url, topics, trigger);
 }
 
 start();
