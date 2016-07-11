@@ -2,6 +2,7 @@ var http = require('http');
 var io = require('socket.io');
 var express = require('express');
 var body_parser = require('body-parser');
+var path = require('path');
 
 var app = express();
 var server = http.Server(app);
@@ -30,12 +31,12 @@ io_server.use(function (socket, next){
 
 app.set('view engine', 'ejs');
 
-app.use(express.static(__dirname + '/public'));
-app.use(body_parser.urlencoded({ extended: false }))
-app.use(body_parser.json())
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(body_parser.urlencoded({ extended: false }));
+app.use(body_parser.json());
 
 app.get('/', function(req, res) {
-    res.render('pages/index')
+    res.render('pages/index');
 });
 
 app.get('/send/:topic', function (request, response){
