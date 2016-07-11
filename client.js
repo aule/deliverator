@@ -1,3 +1,6 @@
+/*jslint node: true */
+'use strict';
+
 var IOClient = require('socket.io-client');
 var Hammer = require('./lib/hammer');
 var Trigger = require('./lib/trigger');
@@ -8,35 +11,35 @@ var Trigger = require('./lib/trigger');
     events for the topics, and calls the trigger function when those event
     occur on the server.
 */
-function connect(url, topics, trigger){
+function connect(url, topics, trigger) {
     var opts = {
-        'transports': ['websocket'],
-        'query': {'topics': topics}
-    };
-    var connection = IOClient(url, opts);
-    var url_tested = false;
+            'transports': ['websocket'],
+            'query': {'topics': topics}
+        },
+        connection = new IOClient(url, opts),
+        url_tested = false;
 
-    connection.on('connect', function(){
+    connection.on('connect', function() {
         console.log("Connected to " + url);
         url_tested = true;  // So we can tell if the URL was ever valid
     });
 
-    connection.on('disconnect', function(){
+    connection.on('disconnect', function() {
         console.log("Lost connection to " + url);
     });
 
-    connection.on('updates', function(data){
+    connection.on('updates', function(data) {
         console.log("MESSAGE RECEIVED");
         console.log(data);
         trigger();  // Fire the hammer!!!
     });
 
     // Let the user know if the connection cannot be made
-    connection.on('connect_error', function(error){
+    connection.on('connect_error', function(error) {
         console.log("Connection error.");
         console.log(error);
         // Has the connection dropped, or did it never work to begin with?
-        if(!url_tested){
+        if (!url_tested) {
             console.log("URL might not be valid. Please try again.");
             process.exit(2);
         }
@@ -46,7 +49,7 @@ function connect(url, topics, trigger){
 /*
     Function to read in the command line args and start the client.
 */
-(function start(){
+(function start() {
     var args = process.argv.slice(),
         node = args.shift(),
         script = args.shift(),
@@ -55,7 +58,7 @@ function connect(url, topics, trigger){
         hammer = new Hammer("/dev/ttyUSB0"),
         trigger = new Trigger(hammer);
 
-    if(!url){
+    if (!url) {
         console.log("Usage: " + node + " " + script + " <url> <topic> [... <topic>]");
         process.exit(1);
     }
