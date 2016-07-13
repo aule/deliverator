@@ -1,8 +1,10 @@
 /*jslint node: true */
 'use strict';
 
+var yargs = require('yargs');
 var IOClient = require('socket.io-client');
 var Hammer = require('./lib/hammer');
+var PiHammer = require('./lib/pihammer');
 var Trigger = require('./lib/trigger');
 
 /*
@@ -18,6 +20,8 @@ function connect(url, topics, trigger) {
         },
         connection = new IOClient(url, opts),
         url_tested = false;
+
+    console.log("Connecting to server at " + connection.io.uri);
 
     connection.on('connect', function() {
         console.log("Connected to " + url);
@@ -40,27 +44,98 @@ function connect(url, topics, trigger) {
         console.log(error);
         // Has the connection dropped, or did it never work to begin with?
         if (!url_tested) {
-            console.log("URL might not be valid. Please try again.");
+            console.log("URL might not be valid. Please check and try again.");
             process.exit(2);
         }
     });
 }
 
 /*
-    Function to read in the command line args and start the client.
+    Function to configure the argument parser and return the options
+*/
+function process_args() {
+    var usage = 'Usage: $0 --url <server> [options]\nor\nUsage: $0 --config <file>',
+        example = 'Example: $0 -u ws://example.com -h gpio -t topic1 topic2';
+
+    return yargs.usage(usage).epilogue(example)
+        .option('config', {
+            alias: 'c',
+            config: true
+        })
+        .option("url", {
+            alias: 'u',
+            describe: 'URL of the triggering server',
+            demand: true
+        })
+        .option('topics', {
+            alias: 't',
+            describe: 'Topics which trigger the hammer',
+            array: true
+        })
+        .option('hammer', {
+            alias: 'h',
+            describe: 'Method of connecting to the hammer',
+            choices: ['serial', 'gpio'],
+            'default': 'serial'
+        })
+        .option('tty', {
+            describe: 'TTY to use for serial connection',
+            'default': '/dev/ttyUSB0'
+        })
+        .option('pin', {
+            describe: 'Pin to use for GPIO connection',
+            number: true,
+            'default': 16
+        })
+        .option('extend', {
+            alias: 'e',
+            describe: 'Duration in ms for extending the hammer',
+            number: true,
+            'default': 200
+        })
+        .option('retract', {
+            alias: 'r',
+            describe: 'Duration in ms for retracting the hammer',
+            number: true,
+            'default': 500
+        })
+        .option('queuesize', {
+            alias: 'q',
+            describe: 'Maximum number of queued hammer triggers',
+            'default': 10
+        })
+        .group(['url', 'topic'], "Listening to triggers")
+        .group(['hammer', 'tty', 'pin'], "Controlling the hammer")
+        .group(['extend', 'retract'], "Hammer timings")
+        .help()
+        .argv;
+}
+
+/*
+    Function to load in the configuration and start the client.
 */
 (function start() {
-    var args = process.argv.slice(),
-        node = args.shift(),
-        script = args.shift(),
-        url = args.shift(),
-        topics = args,
-        hammer = new Hammer("/dev/ttyUSB0"),
-        trigger = new Trigger(hammer);
+    var args = process_args(),
+        url = args.url,
+        topics = args.topics,
+        hammer,
+        trigger;
 
-    if (!url) {
-        console.log("Usage: " + node + " " + script + " <url> <topic> [... <topic>]");
-        process.exit(1);
+    if (!topics) {
+        console.warn("There are no subscribed topics so nothing will be triggered");
     }
+
+    if (args.hammer === 'serial') {
+        hammer = new Hammer(args.tty);
+    } else {
+        hammer = new PiHammer(args.pin);
+    }
+
+    trigger = new Trigger(hammer, {
+        extend_time: args.extend,
+        retract_time: args.retract,
+        max_trigger_count: args.queuesize
+    })
+
     connect(url, topics, trigger);
 }());
