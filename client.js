@@ -91,13 +91,13 @@ function process_args() {
             alias: 'e',
             describe: 'Duration in ms for extending the hammer',
             number: true,
-            'default': 200
+            'default': 300
         })
         .option('retract', {
             alias: 'r',
             describe: 'Duration in ms for retracting the hammer',
             number: true,
-            'default': 500
+            'default': 200
         })
         .option('queuesize', {
             alias: 'q',
