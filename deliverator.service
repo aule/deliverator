@@ -3,7 +3,8 @@ Description=Deliverator
 
 [Service]
 ExecStart=/usr/local/bin/node client -c config.json
-Restart=on-abort
+Restart=always
+RestartSec=5
 Group=gpio
 WorkingDirectory=/home/pi/deliverator
 
